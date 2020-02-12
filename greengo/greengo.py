@@ -3,6 +3,7 @@ import errno
 import fire
 import json
 import yaml
+import argparse
 import shutil
 import urllib
 from time import sleep
@@ -18,7 +19,7 @@ log = logging.getLogger('greengo')
 log.setLevel(logging.DEBUG)
 
 # Where do we want to save group state data? Where should we get the Root Certificate from?
-DEFINITION_FILE = 'greengo.yaml'
+DEFINITION_FILE = ""#'greengo.yaml'
 MAGIC_DIR = '.gg'
 STATE_FILE = os.path.join(MAGIC_DIR, 'gg_state.json')
 ROOT_CA_URL = "https://www.amazontrust.com/repository/AmazonRootCA1.pem"
@@ -26,7 +27,8 @@ ROOT_CA_URL = "https://www.amazontrust.com/repository/AmazonRootCA1.pem"
 DEPLOY_TIMEOUT = 90  # Timeout, seconds
 
 class GroupCommands(object):
-    def __init__(self, config_file=DEFINITION_FILE, bulk=False):
+
+    def __init__(self, config_file, bulk=False):
         global STATE_FILE, DEFINITION_FILE, MAGIC_DIR
 
         # Get the current session data from AWS' Boto3
@@ -1240,9 +1242,14 @@ def _save_keys(path, name, keys_cert):
                   'Check the keys {1}'.format(e, keys_cert))
 
 # Call fire to allow us to just call the method names from the command line
-def main():
-    fire.Fire(GroupCommands)
+def main(config_file):
+    fire.Fire(GroupCommands(config_file))
 
 # Run main()
+
+command_line_parser = argparse.ArgumentParser()
+command_line_parser.add_argument('--config-file', type=str, help='Yaml file containing the service config')
+command_line_args = command_line_parser.parse_args()
+
 if __name__ == '__main__':
-    main()
+    main(command_line_args.config_file)
